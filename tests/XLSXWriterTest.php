@@ -4,7 +4,7 @@ namespace XLSXWriter;
 
 use PHPUnit\Framework\TestCase;
 use SimpleXMLElement;
-use XLSXWriter\BuffererWriter;
+use XLSXWriter\BufferedWriter;
 use XLSXWriter\XLSXWriter;
 use ZipArchive;
 
@@ -16,7 +16,7 @@ class XLSXWriterTest extends TestCase {
 
   public function testWriteCell() {
     $filename = tempnam("/tmp", "xlsx_writer");
-    $file_writer = new BuffererWriter($filename);
+    $file_writer = new BufferedWriter($filename);
 
     $xlsxWriter = new XLSXWriter();
     $xlsxWriter->writeCell($file_writer, 0, 0, '0123', 'string', 1);

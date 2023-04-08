@@ -171,7 +171,7 @@ class XLSXWriter {
       'sheetname' => $sheet_name,
       'xmlname' => $sheet_xmlname,
       'row_count' => 0,
-      'file_writer' => new BuffererWriter($sheet_filename),
+      'file_writer' => new BufferedWriter($sheet_filename),
       'columns' => array(),
       'merge_cells' => array(),
       'max_cell_tag_start' => 0,
@@ -402,7 +402,7 @@ class XLSXWriter {
     $this->finalizeSheet($sheet_name);
   }
 
-  public function writeCell(BuffererWriter &$file, $row_number, $column_number, $value, $num_format_type, $cell_style_idx) {
+  public function writeCell(BufferedWriter &$file, $row_number, $column_number, $value, $num_format_type, $cell_style_idx) {
     $cell_name = $this->xlsCell($row_number, $column_number);
 
     if (!is_scalar($value) || $value === '') { //objects, array, empty
@@ -547,7 +547,7 @@ class XLSXWriter {
     $style_indexes = $r['styles'];
 
     $temporary_filename = $this->tempFilename();
-    $file = new BuffererWriter($temporary_filename);
+    $file = new BufferedWriter($temporary_filename);
     $file->write('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' . "\n");
     $file->write('<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">');
     $file->write('<numFmts count="' . count($this->number_formats) . '">');

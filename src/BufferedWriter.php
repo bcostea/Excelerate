@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace XLSXWriter;
 
-class BuffererWriter {
+class BufferedWriter {
 
   /**
    * @var resource|false|null
