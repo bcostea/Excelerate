@@ -11,6 +11,10 @@ It is designed to output an Excel compatible spreadsheet in (Office 2007+) xlsx 
 * supports basic cell styling
 * supports writing huge 100K+ row spreadsheets
 
+Documentation: 
+* http://www.ecma-international.org/publications/standards/Ecma-376.htm
+* http://officeopenxml.com/SSstyles.php
+
 [Never run out of memory with PHPExcel again](https://github.com/mk-j/PHP_XLSXWriter).
 
 Simple PHP CLI example:
