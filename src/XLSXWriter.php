@@ -16,9 +16,12 @@ class XLSXWriter {
   protected $title;
   protected $subject;
   protected $author;
-  protected $isRightToLeft;
+  protected $isRightToLeft = false;
   protected $company;
   protected $description;
+  /**
+   * @var array<string>
+   */
   protected $keywords = array();
 
   protected $current_sheet;
@@ -27,7 +30,7 @@ class XLSXWriter {
   protected $cell_styles = array();
   protected $number_formats = array();
 
-  private $tempdir;
+  private string $tempdir;
 
   public function __construct() {
     defined('ENT_XML1') or define('ENT_XML1', 16); //for php 5.3, avoid fatal error

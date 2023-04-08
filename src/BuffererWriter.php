@@ -1,59 +1,98 @@
 <?php
 
+declare(strict_types=1);
+
 namespace XLSXWriter;
 
 class BuffererWriter {
-  protected $fileDescriptor = null;
-  protected $buffer = '';
-  protected $check_utf8 = false;
 
-  public function __construct($filename, $fd_fopen_flags = 'w', $check_utf8 = false) {
-    $this->check_utf8 = $check_utf8;
-    $this->fileDescriptor = fopen($filename, $fd_fopen_flags);
+  /**
+   * @var resource|false|null
+   */
+  protected $fileDescriptor = null;
+
+  protected string $buffer = '';
+  protected bool $checkUtf8 = false;
+
+  /**
+   * BuffererWriter constructor.
+   * @param string $filename
+   * @param string $fdFopenFlags
+   * @param bool $checkUtf8
+   */
+  public function __construct(string $filename, string $fdFopenFlags = 'w', bool $checkUtf8 = false) {
+    $this->checkUtf8 = $checkUtf8;
+    $this->fileDescriptor = fopen($filename, $fdFopenFlags);
     if ($this->fileDescriptor === false) {
       $this->log("Unable to open $filename for writing.");
     }
   }
 
-  public function write($string) {
-    $this->buffer .= $string;
+  /**
+   * Write a string to the buffer
+   * @param string $stringValue
+   */
+  public function write($stringValue): void {
+    $this->buffer .= $stringValue;
     if (isset($this->buffer[8191])) {
       $this->purge();
     }
   }
 
-  protected function purge() {
-    if ($this->fileDescriptor) {
-      if ($this->check_utf8 && !$this->isValidUTF8($this->buffer)) {
-        $this->log("Error, invalid UTF8 encoding detected.");
-        $this->check_utf8 = false;
-      }
-      fwrite($this->fileDescriptor, $this->buffer);
-      $this->buffer = '';
+  /**
+   * Purge the buffer to the file
+   */
+  protected function purge(): void {
+    if (!$this->fileDescriptor) {
+      return;
     }
+    if ($this->checkUtf8 && !$this->isValidUTF8($this->buffer)) {
+      $this->log("Error, invalid UTF8 encoding detected.");
+      $this->checkUtf8 = false;
+    }
+    fwrite($this->fileDescriptor, $this->buffer);
+    $this->buffer = '';
   }
 
-  public function close() {
+  /**
+   * Close the file
+   */
+  public function close(): void {
     $this->purge();
-    if ($this->fileDescriptor) {
-      fclose($this->fileDescriptor);
-      $this->fileDescriptor = null;
+
+    if (!$this->fileDescriptor) {
+      return;
     }
+
+    fclose($this->fileDescriptor);
+    $this->fileDescriptor = null;
   }
 
+  /**
+   * Destructor
+   */
   public function __destruct() {
     $this->close();
   }
 
+  /**
+   * Get the current position in the file
+   * @return int|false
+   */
   public function ftell() {
-    if ($this->fileDescriptor) {
-      $this->purge();
-      return ftell($this->fileDescriptor);
+    if (!$this->fileDescriptor) {
+      return -1;
     }
-    return -1;
+    $this->purge();
+    return ftell($this->fileDescriptor);
   }
 
-  public function fseek($pos) {
+  /**
+   * Seek to a position in the file
+   * @param int $pos
+   * @return int|false
+   */
+  public function fseek(int $pos) {
     if ($this->fileDescriptor) {
       $this->purge();
       return fseek($this->fileDescriptor, $pos);
@@ -61,6 +100,11 @@ class BuffererWriter {
     return -1;
   }
 
+  /**
+   * Check if the string is valid UTF8
+   * @param string $string
+   * @return bool
+   */
   protected static function isValidUTF8($string) {
     if (function_exists('mb_check_encoding')) {
       return mb_check_encoding($string, 'UTF-8') ? true : false;
@@ -68,7 +112,11 @@ class BuffererWriter {
     return preg_match("//u", $string) ? true : false;
   }
 
-  public function log($string) {
-    error_log(date("Y-m-d H:i:s:") . rtrim(is_array($string) ? json_encode($string) : $string) . "\n");
+  /**
+   * Log a message
+   * @param string|array<string> $message
+   */
+  public function log($message): void {
+    error_log(date("Y-m-d H:i:s:") . rtrim(is_array($message) ? json_encode($message) : $message) . "\n");
   }
 }
