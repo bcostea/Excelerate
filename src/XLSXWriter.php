@@ -220,7 +220,7 @@ class XLSXWriter {
       }
     }
 
-    $sheet->file_writer->write('<col collapsed="false" hidden="false" max="1024" min="' . ($i + 1) . '" style="0" customWidth="false" width="11.5"/>');
+    $sheet->file_writer->write('<col collapsed="false" hidden="false" max="1024" min="' . ($colIdx + 1) . '" style="0" customWidth="false" width="11.5"/>');
     $sheet->file_writer->write('</cols>');
     $sheet->file_writer->write('<sheetData>');
   }
@@ -399,7 +399,7 @@ class XLSXWriter {
     $this->finalizeSheet($sheet_name);
   }
 
-  protected function writeCell(BuffererWriter &$file, $row_number, $column_number, $value, $num_format_type, $cell_style_idx) {
+  public function writeCell(BuffererWriter &$file, $row_number, $column_number, $value, $num_format_type, $cell_style_idx) {
     $cell_name = $this->xlsCell($row_number, $column_number);
 
     if (!is_scalar($value) || $value === '') { //objects, array, empty
