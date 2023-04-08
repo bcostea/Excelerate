@@ -1,4 +1,6 @@
 <?php
+
+namespace XLSXWriter;
 /*
  * @license MIT License
  * */
@@ -26,6 +28,14 @@ class XLSXWriter {
     date_default_timezone_get() or date_default_timezone_set('UTC'); //php.ini missing tz, avoid warning
     is_writeable($this->tempFilename()) or self::log("Warning: tempdir " . sys_get_temp_dir() . " not writeable, use ->setTempDir()");
     class_exists('ZipArchive') or self::log("Error: ZipArchive class does not exist");
+
+    if (!ini_get('date.timezone')) {
+      //using date functions can kick out warning if this isn't set
+      date_default_timezone_set('UTC');
+    }
+    $this->addCellStyle($number_format = 'GENERAL', $style_string = null);
+    $this->addCellStyle($number_format = 'GENERAL', $style_string = null);
+    $this->addCellStyle($number_format = 'GENERAL', $style_string = null);
     $this->addCellStyle($number_format = 'GENERAL', $style_string = null);
   }
 
@@ -262,12 +272,14 @@ class XLSXWriter {
       $sheet->columns = array_merge((array)$sheet->columns, $default_column_types);
     }
 
+    $customFormat = false;
     if (!empty($row_options)) {
       $ht = isset($row_options['height']) ? floatval($row_options['height']) : 12.1;
       $customHt = isset($row_options['height']) ? true : false;
+      $customFormat = isset($row_options['customFormat']) ? true : false;
       $hidden = isset($row_options['hidden']) ? (bool)($row_options['hidden']) : false;
       $collapsed = isset($row_options['collapsed']) ? (bool)($row_options['collapsed']) : false;
-      $sheet->file_writer->write('<row collapsed="' . ($collapsed ? 'true' : 'false') . '" customFormat="false" customHeight="' . ($customHt ? 'true' : 'false') . '" hidden="' . ($hidden ? 'true' : 'false') . '" ht="' . ($ht) . '" outlineLevel="0" r="' . ($sheet->row_count + 1) . '">');
+      $sheet->file_writer->write('<row collapsed="' . ($collapsed) . '" customFormat="false" customHeight="' . ($customHt) . '" hidden="' . ($hidden) . '" ht="' . ($ht) . '" outlineLevel="0" r="' . ($sheet->row_count + 1) . '">');
     } else {
       $sheet->file_writer->write('<row collapsed="false" customFormat="false" customHeight="false" hidden="false" ht="12.1" outlineLevel="0" r="' . ($sheet->row_count + 1) . '">');
     }
@@ -275,9 +287,20 @@ class XLSXWriter {
     $style = &$row_options;
     $c = 0;
     foreach ($row as $v) {
-      $number_format = $sheet->columns[$c]['number_format'];
-      $number_format_type = $sheet->columns[$c]['number_format_type'];
-      $cell_style_idx = empty($style) ? $sheet->columns[$c]['default_cell_style'] : $this->addCellStyle($number_format, json_encode(isset($style[0]) ? $style[$c] : $style));
+      if (isset($style[$c]) && is_array($style[$c])) {
+        $customFormat = isset($style[$c]['customFormat']) ? true : false;
+      }
+      if ($customFormat) {
+        $number_format_type = 'n_string';
+        if (isset($style[$c]['format_type'])) {
+          $number_format_type = $style[$c]['format_type'];
+        }
+        $cell_style_idx = $this->addCellStyle("GENERAL", json_encode(isset($style[0]) ? $style[$c] : $style));
+      } else {
+        $number_format = $sheet->columns[$c]['number_format'];
+        $number_format_type = $sheet->columns[$c]['number_format_type'];
+        $cell_style_idx = empty($style) ? $sheet->columns[$c]['default_cell_style'] : $this->addCellStyle($number_format, json_encode(isset($style[0]) ? $style[$c] : $style));
+      }
       $this->writeCell($sheet->file_writer, $sheet->row_count, $c, $v, $number_format_type, $cell_style_idx);
       $c++;
     }
@@ -361,6 +384,26 @@ class XLSXWriter {
       $file->write('<c r="' . $cell_name . '" s="' . $cell_style_idx . '"/>');
     } elseif (is_string($value) && $value[0] == '=') {
       $file->write('<c r="' . $cell_name . '" s="' . $cell_style_idx . '" t="s"><f>' . self::xmlspecialchars($value) . '</f></c>');
+    } elseif (is_string($value) && $value[0] == '{' && $value[1] == "=") {
+      $vl = substr($value, 2, -1);
+      $custom_t = 's';
+      if (isset($num_format_type)) {
+        switch ($num_format_type) {
+          case 'n_string':
+            $custom_t = 'inlineStr';
+            break;
+          case 'n_numeric':
+            $custom_t = 'n';
+            break;
+          case 'n_date':
+            $custom_t = 'd';
+            break;
+          case 'n_datetime':
+            $custom_t = 'd';
+            break;
+        }
+      }
+      $file->write('<c r="' . $cell_name . '" s="' . $cell_style_idx . '" t="' . $custom_t . '"><f t="array" ref="' . $cell_name . '">' . self::xmlspecialchars($vl) . '</f><v>0</v></c>');
     } elseif ($num_format_type == 'n_date') {
       $file->write('<c r="' . $cell_name . '" s="' . $cell_style_idx . '" t="n"><v>' . intval(self::convert_date_time($value)) . '</v></c>');
     } elseif ($num_format_type == 'n_datetime') {
@@ -425,7 +468,9 @@ class XLSXWriter {
         $style_indexes[$i]['alignment'] = true;
         $style_indexes[$i]['wrap_text'] = (bool)$style['wrap_text'];
       }
-
+      if (isset($style['textRotation'])) {
+        $style_indexes[$i]['textRotation'] = $style['textRotation'];
+      }
       $font = $default_font;
       if (isset($style['font-size'])) {
         $font['size'] = floatval($style['font-size']); //floatval to allow "10.5" etc
@@ -584,6 +629,7 @@ class XLSXWriter {
       $applyAlignment = isset($v['alignment']) ? 'true' : 'false';
       $wrapText = !empty($v['wrap_text']) ? 'true' : 'false';
       $horizAlignment = isset($v['halign']) ? $v['halign'] : 'general';
+      $textRotation = isset($v['textRotation']) ? $v['textRotation'] : '0';
       $vertAlignment = isset($v['valign']) ? $v['valign'] : 'bottom';
       $applyBorder = isset($v['border_idx']) ? 'true' : 'false';
       $applyFont = 'true';
@@ -592,7 +638,7 @@ class XLSXWriter {
       $fontIdx = isset($v['font_idx']) ? intval($v['font_idx']) : 0;
       //$file->write('<xf applyAlignment="'.$applyAlignment.'" applyBorder="'.$applyBorder.'" applyFont="'.$applyFont.'" applyProtection="false" borderId="'.($borderIdx).'" fillId="'.($fillIdx).'" fontId="'.($fontIdx).'" numFmtId="'.(164+$v['num_fmt_idx']).'" xfId="0"/>');
       $file->write('<xf applyAlignment="' . $applyAlignment . '" applyBorder="' . $applyBorder . '" applyFont="' . $applyFont . '" applyProtection="false" borderId="' . ($borderIdx) . '" fillId="' . ($fillIdx) . '" fontId="' . ($fontIdx) . '" numFmtId="' . (164 + $v['num_fmt_idx']) . '" xfId="0">');
-      $file->write('	<alignment horizontal="' . $horizAlignment . '" vertical="' . $vertAlignment . '" textRotation="0" wrapText="' . $wrapText . '" indent="0" shrinkToFit="false"/>');
+      $file->write('	<alignment horizontal="' . $horizAlignment . '" vertical="' . $vertAlignment . '" textRotation="' . $textRotation . '" wrapText="' . $wrapText . '" indent="0" shrinkToFit="false"/>');
       $file->write('	<protection locked="true" hidden="false"/>');
       $file->write('</xf>');
     }
@@ -728,7 +774,6 @@ class XLSXWriter {
   }
   //------------------------------------------------------------------
   public static function log($string) {
-    //file_put_contents("php://stderr", date("Y-m-d H:i:s:").rtrim(is_array($string) ? json_encode($string) : $string)."\n");
     error_log(date("Y-m-d H:i:s:") . rtrim(is_array($string) ? json_encode($string) : $string) . "\n");
   }
   //------------------------------------------------------------------
@@ -791,6 +836,7 @@ class XLSXWriter {
     else if ($num_format == 'date')     $num_format = 'YYYY-MM-DD';
     else if ($num_format == 'datetime') $num_format = 'YYYY-MM-DD HH:MM:SS';
     else if ($num_format == 'time')     $num_format = 'HH:MM:SS';
+    else if ($num_format == 'percent')  $num_format = '0.00%';
     else if ($num_format == 'price')    $num_format = '#,##0.00';
     else if ($num_format == 'dollar')   $num_format = '[$$-1009]#,##0.00;[RED]-[$$-1009]#,##0.00';
     else if ($num_format == 'euro')     $num_format = '#,##0.00 [$€-407];[RED]-#,##0.00 [$€-407]';
