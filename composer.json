@@ -1,19 +1,37 @@
 {
-    "name": "mk-j/php_xlsxwriter",
-    "description": "PHP Library to write XLSX files",
-    "keywords": ["php", "library","xls", "xlsx", "excel"],
-    "type": "project",
-    "homepage": "https://github.com/mk-j/PHP_XLSXWriter",
-    "license": "MIT",
-
-    "autoload": {
-        "classmap": ["xlsxwriter.class.php"]
-    },
-    "require-dev": {
-        "phpunit/phpunit": "4.3.*"
-    },
-    "require": {
-        "php": ">=5.2.1",
-        "ext-zip": "*"
+  "name": "bcostea/xlsxwriter",
+  "description": "PHP Library to write XLSX files",
+  "keywords": [
+    "xls",
+    "xlsx",
+    "excel"
+  ],
+  "type": "project",
+  "homepage": "https://github.com/bcostea/XLSXWriter",
+  "license": "MIT",
+  "autoload": {
+    "psr-4": {
+      "XLSXWriter\\": "src"
     }
+  },
+  "require-dev": {
+    "jangregor/phpstan-prophecy": "^1.0.0",
+    "php-parallel-lint/php-console-highlighter": "^1.0",
+    "php-parallel-lint/php-parallel-lint": "^1.3",
+    "phpmd/phpmd": "^2.9",
+    "phpstan/extension-installer": "^1.0.5",
+    "phpstan/phpstan": "^1.8",
+    "phpunit/phpunit": "^9.5"
+  },
+  "config": {
+    "process-timeout": 0,
+    "sort-packages": true,
+    "allow-plugins": {
+      "phpstan/extension-installer": true
+    }
+  },
+  "require": {
+    "php": "^8.0",
+    "ext-zip": "*"
+  }
 }
