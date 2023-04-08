@@ -1,6 +1,9 @@
 <?php
 
 namespace XLSXWriter;
+
+use ZipArchive;
+
 /*
  * @license MIT License
  * */
@@ -22,6 +25,8 @@ class XLSXWriter {
   protected $temp_files = array();
   protected $cell_styles = array();
   protected $number_formats = array();
+
+  private $tempdir;
 
   public function __construct() {
     defined('ENT_XML1') or define('ENT_XML1', 16); //for php 5.3, avoid fatal error
