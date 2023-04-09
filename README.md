@@ -22,11 +22,16 @@ Documentation:
 * http://officeopenxml.com/SSstyles.php
 
 ## Usage ##
+### Installing ###
+Use Composer:
+```bash
+composer require bcostea/excelerate
+```
+
 ### Reading ####
 Open an Excel file:
 
 ```php
-require('XLSXReader.php');
 $xlsx = new XLSXReader('sample.xlsx');
 ```
 
