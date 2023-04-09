@@ -1,13 +1,15 @@
-PHP_XLSXWriter
+XLSXWriter
 ==============
+
+Based on [mk-j/PHP_XLSXWriter](https://github.com/mk-j/PHP_XLSXWriter)
 
 This library is designed to be lightweight, and have minimal memory usage.
 
-It is designed to output an Excel compatible spreadsheet in (Office 2007+) xlsx format, with just basic features supported:
-* supports PHP 5.2.1+
+It is designed to output an Excel compatible spreadsheet in (Office 2007+) xlsx format:
+* supports PHP 8+
 * takes UTF-8 encoded input
 * multiple worksheets
-* supports currency/date/numeric cell formatting, simple formulas
+* supports currency/date/numeric cell formatting, simple and array formulas
 * supports basic cell styling
 * supports writing huge 100K+ row spreadsheets
 
@@ -15,7 +17,6 @@ Documentation:
 * http://www.ecma-international.org/publications/standards/Ecma-376.htm
 * http://officeopenxml.com/SSstyles.php
 
-[Never run out of memory with PHPExcel again](https://github.com/mk-j/PHP_XLSXWriter).
 
 Simple PHP CLI example:
 ```php
@@ -52,26 +53,6 @@ foreach($data as $row)
 $writer->writeToFile('example.xlsx');
 ```
 
-50000 rows: (1.4s, 0MB memory usage)
-```php
-include_once("xlsxwriter.class.php");
-$writer = new XLSXWriter();
-$writer->writeSheetHeader('Sheet1', array('c1'=>'integer','c2'=>'integer','c3'=>'integer','c4'=>'integer') );
-for($i=0; $i<50000; $i++)
-{
-    $writer->writeSheetRow('Sheet1', array($i, $i+1, $i+2, $i+3) );
-}
-$writer->writeToFile('huge.xlsx');
-echo '#'.floor((memory_get_peak_usage())/1024/1024)."MB"."\n";
-```
-| rows   | time | memory |
-| ------ | ---- | ------ |
-|  50000 | 1.4s | 0MB    |
-| 100000 | 2.7s | 0MB    |
-| 150000 | 4.1s | 0MB    |
-| 200000 | 5.7s | 0MB    |
-| 250000 | 7.0s | 0MB    |
-
 Simple cell formats map to more advanced cell formats
 
 | simple formats | format code |
@@ -84,7 +65,6 @@ Simple cell formats map to more advanced cell formats
 | price    | #,##0.00 |
 | dollar   | [$$-1009]#,##0.00;[RED]-[$$-1009]#,##0.00 |
 | euro     | #,##0.00 [$€-407];[RED]-#,##0.00 [$€-407] |
-
 
 Basic cell styles have been available since version 0.30
 
@@ -101,6 +81,3 @@ Basic cell styles have been available since version 0.30
 | halign       | general, left, right, justify, center |
 | valign       | bottom, center, distributed |
 | textRotation | 0-360 |
-
-
-
