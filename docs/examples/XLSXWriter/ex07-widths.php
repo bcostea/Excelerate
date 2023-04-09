@@ -1,7 +1,6 @@
 <?php
-set_include_path(get_include_path() . PATH_SEPARATOR . "..");
-include_once("xlsxwriter.class.php");
 
+use Excelerate\XLSXWriter;
 
 $writer = new XLSXWriter();
 $writer->writeSheetHeader('Sheet1', $rowdata = array(300, 234, 456, 789), $col_options = ['widths' => [10, 20, 30, 40]]);

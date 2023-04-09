@@ -1,7 +1,6 @@
 <?php
-set_include_path(get_include_path() . PATH_SEPARATOR . "..");
-include_once("xlsxwriter.class.php");
 
+use Excelerate\XLSXWriter;
 
 $writer = new XLSXWriter();
 $styles1 = array('font' => 'Arial', 'font-size' => 10, 'font-style' => 'bold', 'fill' => '#eee', 'halign' => 'center', 'border' => 'left,right,top,bottom');

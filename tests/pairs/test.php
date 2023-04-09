@@ -1,5 +1,6 @@
 <?php
-include_once("../../xlsxwriter.class.php");
+
+use Excelerate\XLSXWriter;
 
 $writer = new XLSXWriter();
 $keywords = array('some','interesting','keywords');

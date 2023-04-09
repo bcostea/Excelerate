@@ -1,11 +1,15 @@
-XLSXWriter
+Excelerate
 ==============
 
-Based on [mk-j/PHP_XLSXWriter](https://github.com/mk-j/PHP_XLSXWriter)
-
+## Description ##
 This library is designed to be lightweight, and have minimal memory usage.
 
-It is designed to output an Excel compatible spreadsheet in (Office 2007+) xlsx format:
+Based on:
+* [mk-j/PHP_XLSXWriter](https://github.com/mk-j/PHP_XLSXWriter)
+* [gneustaetter/XLSXReader](https://github.com/gneustaetter/XLSXReader)
+
+
+It is designed to read an write Excel compatible spreadsheets in (Office 2007+) XLSX format:
 * supports PHP 8+
 * takes UTF-8 encoded input
 * multiple worksheets
@@ -17,8 +21,30 @@ Documentation:
 * http://www.ecma-international.org/publications/standards/Ecma-376.htm
 * http://officeopenxml.com/SSstyles.php
 
+## Usage ##
+### Reading ####
+Open an Excel file:
 
-Simple PHP CLI example:
+```php
+require('XLSXReader.php');
+$xlsx = new XLSXReader('sample.xlsx');
+```
+
+Get a list of the sheets:
+
+```php
+$sheets = $xlsx->getSheetNames();
+```
+
+Get the data from a sheet:
+
+```php
+$data = $xlsx->getSheetData('Sales');
+``` 
+
+### Writing ####
+
+Simple example:
 ```php
 $data = array(
     array('year','month','amount'),

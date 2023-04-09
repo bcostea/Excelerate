@@ -1,17 +1,31 @@
 {
-  "name": "bcostea/xlsxwriter",
-  "description": "PHP Library to write XLSX files",
+  "name": "bcostea/excelerate",
+  "description": "PHP Library to write and read XLSX files",
   "keywords": [
     "xls",
     "xlsx",
     "excel"
   ],
+  "authors": [
+    {
+      "name": "Bogdan Costea",
+      "homepage": "https://github.com/bcostea"
+    },
+    {
+      "name": "Mark Jones",
+      "homepage": "https://github.com/mk-j"
+    },
+    {
+      "name": "Greg Neustaetter",
+      "homepage": "https://github.com/gneustaetter"
+    }
+  ],
   "type": "project",
-  "homepage": "https://github.com/bcostea/XLSXWriter",
+  "homepage": "https://github.com/bcostea/Excelerate",
   "license": "MIT",
   "autoload": {
     "psr-4": {
-      "XLSXWriter\\": "src"
+      "Excelerate\\": "src"
     }
   },
   "require-dev": {
@@ -32,6 +46,7 @@
   },
   "require": {
     "php": "^8.0",
-    "ext-zip": "*"
+    "ext-zip": "*",
+    "ext-SimpleXML": "*"
   }
 }

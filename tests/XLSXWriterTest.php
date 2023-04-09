@@ -1,11 +1,11 @@
 <?php
 
-namespace XLSXWriter;
+namespace Excelerate;
 
 use PHPUnit\Framework\TestCase;
 use SimpleXMLElement;
-use XLSXWriter\BufferedWriter;
-use XLSXWriter\XLSXWriter;
+use Excelerate\BufferedWriter;
+use Excelerate\XLSXWriter;
 use ZipArchive;
 
 //TODO test double:writeSheetHeader

@@ -1,5 +1,6 @@
 <?php
-include_once("../xlsxwriter.class.php");
+
+use Excelerate\XLSXWriter;
 
 $header = array(
     'year'=>'string',

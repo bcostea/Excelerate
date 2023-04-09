@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace XLSXWriter;
+namespace Excelerate;
 
 class BufferedWriter {
 
@@ -15,7 +15,7 @@ class BufferedWriter {
   protected bool $checkUtf8 = false;
 
   /**
-   * BuffererWriter constructor.
+   * BufferedWriter constructor.
    * @param string $filename
    * @param string $fdFopenFlags
    * @param bool $checkUtf8

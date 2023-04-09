@@ -1,6 +1,6 @@
 <?php
 
-namespace XLSXWriter;
+namespace Excelerate;
 
 use Exception;
 use ZipArchive;
