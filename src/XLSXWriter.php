@@ -180,6 +180,17 @@ class XLSXWriter {
       'freeze_rows' => $freeze_rows,
       'freeze_columns' => $freeze_columns,
       'finalized' => false,
+      'margin_left' => 0.5,
+      'margin_right' => 0.5,
+      'margin_top' => 1.0,
+      'margin_bottom' => 1.0,
+      'margin_header' => 0.5,
+      'margin_footer' => 0.5,
+      'scale' => 100,
+      'orientation' => 'portrait',
+      'paper_size' => '1',
+      'header_content' => '&amp;C&amp;&quot;Times New Roman,Regular&quot;&amp;12&amp;A',
+      'footer_content' => '&amp;C&amp;&quot;Times New Roman,Regular&quot;&amp;12Page &amp;P',
     );
     $rightToLeftValue = $this->isRightToLeft ? 'true' : 'false';
     $sheet = &$this->sheets[$sheet_name];
@@ -282,6 +293,117 @@ class XLSXWriter {
     $this->current_sheet = $sheet_name;
   }
 
+  /**
+   * Set the orientation for a worksheet
+   *
+   * @param string $sheet_name
+   * @param string $orientation
+   * @return void
+   */
+  public function setOrientation($sheet_name, $orientation = 'portrait') {
+    if (empty($sheet_name))
+      return;
+
+    self::initializeSheet($sheet_name);
+    $sheet = &$this->sheets[$sheet_name];
+    $sheet->orientation = $orientation;
+  }
+
+  /**
+   * Set print margins for a worksheet
+   *
+   * @param string $sheet_name
+   * @param float $left
+   * @param float $right
+   * @param float $top
+   * @param float $bottom
+   * @param float $header
+   * @param float $footer
+   * @return void
+   */
+  public function setMargins($sheet_name, $left = 0.5, $right = 0.5, $top = 1.0, $bottom = 1.0, $header = 0.5, $footer = 0.5) {
+    if (empty($sheet_name))
+      return;
+
+    self::initializeSheet($sheet_name);
+    $sheet = &$this->sheets[$sheet_name];
+
+    $sheet->margin_left = $left;
+    $sheet->margin_right = $right;
+    $sheet->margin_top = $top;
+    $sheet->margin_bottom = $bottom;
+    $sheet->margin_header = $header;
+    $sheet->margin_footer = $footer;
+  }
+
+  /**
+   * Set paper size for a worksheet
+   *
+   * @param string $sheet_name
+   * @param string $paperSize
+   * @return void
+   */
+  public function setPaperSize($sheet_name, $paperSize = '1') {
+    if (empty($sheet_name))
+      return;
+
+    self::initializeSheet($sheet_name);
+    $sheet = &$this->sheets[$sheet_name];
+    $sheet->paper_size = $paperSize;
+  }
+
+  /**
+   * Set header content in proper format
+   * TODO: identify format, document
+   * @param string $sheet_name
+   * @param string $content
+   * @return void
+   */
+  public function setHeaderContent($sheet_name, $content) {
+    if (empty($sheet_name))
+      return;
+    if (empty($content))
+      return;
+
+    self::initializeSheet($sheet_name);
+    $sheet = &$this->sheets[$sheet_name];
+    $sheet->header_content = $content;
+  }
+
+  /**
+   * Set footer content in proper format
+   * TODO: identify format, document
+   * @param string $sheet_name
+   * @param string $content
+   * @return void
+   */
+  public function setFooterContent($sheet_name, $content) {
+    if (empty($sheet_name))
+      return;
+    if (empty($content))
+      return;
+
+    self::initializeSheet($sheet_name);
+    $sheet = &$this->sheets[$sheet_name];
+    $sheet->footer_content = $content;
+  }
+
+  /**
+   * Set page scale for worksheet
+   *
+   * @param string $sheet_name
+   * @param integer $scale
+   * @return void
+   */
+  public function setScale($sheet_name, $scale = 100) {
+    if (empty($sheet_name))
+      return;
+
+    self::initializeSheet($sheet_name);
+    $sheet = &$this->sheets[$sheet_name];
+    $sheet->scale = $scale;
+  }
+
   public function writeSheetRow($sheet_name, array $row, $row_options = null) {
     if (empty($sheet_name))
       return;
@@ -362,11 +484,11 @@ class XLSXWriter {
     }
 
     $sheet->file_writer->write('<printOptions headings="false" gridLines="false" gridLinesSet="true" horizontalCentered="false" verticalCentered="false"/>');
-    $sheet->file_writer->write('<pageMargins left="0.5" right="0.5" top="1.0" bottom="1.0" header="0.5" footer="0.5"/>');
-    $sheet->file_writer->write('<pageSetup blackAndWhite="false" cellComments="none" copies="1" draft="false" firstPageNumber="1" fitToHeight="1" fitToWidth="1" horizontalDpi="300" orientation="portrait" pageOrder="downThenOver" paperSize="1" scale="100" useFirstPageNumber="true" usePrinterDefaults="false" verticalDpi="300"/>');
+    $sheet->file_writer->write('<pageMargins left="' . $sheet->margin_left . '" right="' . $sheet->margin_right . '" top="' . $sheet->margin_top . '" bottom="' . $sheet->margin_bottom . '" header="' . $sheet->margin_header . '" footer="' . $sheet->margin_footer . '"/>');
+    $sheet->file_writer->write('<pageSetup blackAndWhite="false" cellComments="none"  copies="1" draft="false" firstPageNumber="1" useFirstPageNumber="true" orientation="' . $sheet->orientation . '" paperSize="' . $sheet->paper_size . '" scale="' . $sheet->scale . '"/>');
     $sheet->file_writer->write('<headerFooter differentFirst="false" differentOddEven="false">');
-    $sheet->file_writer->write('<oddHeader>&amp;C&amp;&quot;Times New Roman,Regular&quot;&amp;12&amp;A</oddHeader>');
-    $sheet->file_writer->write('<oddFooter>&amp;C&amp;&quot;Times New Roman,Regular&quot;&amp;12Page &amp;P</oddFooter>');
+    $sheet->file_writer->write('<oddHeader>' . $sheet->header_content . '</oddHeader>');
+    $sheet->file_writer->write('<oddFooter>' . $sheet->footer_content . '</oddFooter>');
     $sheet->file_writer->write('</headerFooter>');
     $sheet->file_writer->write('</worksheet>');
 
