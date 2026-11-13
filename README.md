@@ -73,8 +73,8 @@ $header = array(
   'tax'=>'[$$-1009]#,##0.00;[RED]-[$$-1009]#,##0.00',
 );
 $data = array(
-    array('2015-01-01',873,1,'44.00','misc','=D2*0.05'),
-    array('2015-01-12',324,2,'88.00','none','=D3*0.05'),
+    array('2015-01-01',873,1,'44.00','misc',new Formula('=D2*0.05')),
+    array('2015-01-12',324,2,'88.00','none',new Formula('=D3*0.05')),
 );
 
 $writer = new XLSXWriter();
@@ -83,6 +83,21 @@ foreach($data as $row)
 	$writer->writeSheetRow('Sheet1', $row );
 $writer->writeToFile('example.xlsx');
 ```
+
+Formulas:
+```php
+use Excelerate\Formula;
+
+$writer->writeSheetRow('Sheet1', array(
+    new Formula('=A1+B1'),        // simple formula
+    new Formula('{=SUM(A1:A2)}'), // array formula
+    '=A1+B1',                     // text, written exactly as given
+));
+```
+
+Only a `Formula` object becomes a formula. A string is always written as text, also when it starts with `=`. This keeps untrusted text from becoming a formula (CSV/formula injection).
+
+Upgrade from 0.1.x: versions before 0.2.0 wrote each string that started with `=` or `{=` as a formula. Wrap those values in `new Formula(...)`.
 
 Simple cell formats map to more advanced cell formats
 

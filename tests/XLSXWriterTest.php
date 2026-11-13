@@ -27,6 +27,53 @@ class XLSXWriterTest extends TestCase {
     @unlink($filename);
   }
 
+  private function cellXml($value, $type = 'n_auto') {
+    $filename = tempnam("/tmp", "xlsx_writer");
+    $file_writer = new BufferedWriter($filename);
+    $xlsxWriter = new XLSXWriter();
+    $xlsxWriter->writeCell($file_writer, 0, 0, $value, $type, 1);
+    $file_writer->close();
+    $cell_xml = file_get_contents($filename);
+    @unlink($filename);
+    return $cell_xml;
+  }
+
+  public function testStringThatStartsWithEqualsIsText() {
+    foreach (array('n_auto', 'n_string') as $type) {
+      $this->assertEquals('<c r="A1" s="1" t="inlineStr"><is><t>=1+1</t></is></c>', $this->cellXml('=1+1', $type));
+      $this->assertEquals('<c r="A1" s="1" t="inlineStr"><is><t>{=SUM(A1:A2)}</t></is></c>', $this->cellXml('{=SUM(A1:A2)}', $type));
+    }
+  }
+
+  public function testFormulaObjectIsFormula() {
+    $this->assertEquals('<c r="A1" s="1" t="s"><f>=1+1</f></c>', $this->cellXml(new Formula('=1+1')));
+  }
+
+  public function testArrayFormulaObjectIsArrayFormula() {
+    $this->assertEquals('<c r="A1" s="1" t="s"><f t="array" ref="A1">SUM(A1:A2)</f><v>0</v></c>', $this->cellXml(new Formula('{=SUM(A1:A2)}')));
+  }
+
+  public function testHeaderThatStartsWithEqualsIsText() {
+    $filename = tempnam("/tmp", "xlsx_writer");
+    $xlsxWriter = new XLSXWriter();
+    $xlsxWriter->writeSheetHeader('Sheet1', array('=1+1' => 'string'));
+    $xlsxWriter->writeSheetRow('Sheet1', array('=2+2'));
+    $xlsxWriter->writeToFile($filename);
+    $zip = new ZipArchive();
+    $zip->open($filename);
+    $sheet_xml = $zip->getFromName('xl/worksheets/sheet1.xml');
+    $zip->close();
+    @unlink($filename);
+    $this->assertStringNotContainsString('<f', $sheet_xml);
+    $this->assertStringContainsString('<t>=1+1</t>', $sheet_xml);
+    $this->assertStringContainsString('<t>=2+2</t>', $sheet_xml);
+  }
+
+  public function testFormulaRejectsTextThatIsNotAFormula() {
+    $this->expectException(\InvalidArgumentException::class);
+    new Formula('SUM(A1:A2)');
+  }
+
   public function testWriteToFile() {
     $filename = tempnam("/tmp", "xlsx_writer");
 

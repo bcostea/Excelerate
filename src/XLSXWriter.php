@@ -527,12 +527,11 @@ class XLSXWriter {
   public function writeCell(BufferedWriter &$file, $row_number, $column_number, $value, $num_format_type, $cell_style_idx) {
     $cell_name = $this->xlsCell($row_number, $column_number);
 
-    if (!is_scalar($value) || $value === '') { //objects, array, empty
-      $file->write('<c r="' . $cell_name . '" s="' . $cell_style_idx . '"/>');
-    } elseif (is_string($value) && $value[0] == '=') {
-      $file->write('<c r="' . $cell_name . '" s="' . $cell_style_idx . '" t="s"><f>' . $this->xmlspecialchars($value) . '</f></c>');
-    } elseif (is_string($value) && $value[0] == '{' && $value[1] == "=") {
-      $vl = substr($value, 2, -1);
+    // Only a Formula object becomes a formula. A string that starts with "=" stays text.
+    if ($value instanceof Formula && !$value->isArray()) {
+      $file->write('<c r="' . $cell_name . '" s="' . $cell_style_idx . '" t="s"><f>' . $this->xmlspecialchars($value->getBody()) . '</f></c>');
+    } elseif ($value instanceof Formula) {
+      $vl = $value->getBody();
       $custom_t = 's';
       if (isset($num_format_type)) {
         switch ($num_format_type) {
@@ -551,6 +550,8 @@ class XLSXWriter {
         }
       }
       $file->write('<c r="' . $cell_name . '" s="' . $cell_style_idx . '" t="' . $custom_t . '"><f t="array" ref="' . $cell_name . '">' . $this->xmlspecialchars($vl) . '</f><v>0</v></c>');
+    } elseif (!is_scalar($value) || $value === '') { //objects, array, empty
+      $file->write('<c r="' . $cell_name . '" s="' . $cell_style_idx . '"/>');
     } elseif ($num_format_type == 'n_date') {
       $file->write('<c r="' . $cell_name . '" s="' . $cell_style_idx . '" t="n"><v>' . intval($this->convert_date_time($value)) . '</v></c>');
     } elseif ($num_format_type == 'n_datetime') {

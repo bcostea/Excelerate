@@ -1,5 +1,6 @@
 <?php
 
+use Excelerate\Formula;
 use Excelerate\XLSXWriter;
 
 $header = array(
@@ -11,7 +12,7 @@ $header = array(
 );
 $data1 = array(
     array('2003','1','-50.5','2010-01-01 23:00:00','2012-12-31 23:00:00'),
-    array('2003','=B2', '23.5','2010-01-01 00:00:00','2012-12-31 00:00:00'),
+    array('2003',new Formula('=B2'), '23.5','2010-01-01 00:00:00','2012-12-31 00:00:00'),
 );
 $data2 = array(
     array('2003','01','343.12'),
